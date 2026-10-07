@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting started with metaweave</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting started with metaweave</h1>
+
+
+
+<p><code>metaweave</code> combines species distributions with an
+interaction model to infer local ecological networks. This tutorial uses
+invented species and probabilities; no downloads or external data files
+are needed. In a real study, the probabilities could come from an
+independently fitted model or expert knowledge. They are inputs here,
+not quantities estimated from the presence data.</p>
+<div id="define-interaction-probabilities" class="section level2">
+<h2>Define interaction probabilities</h2>
+<p>Rows represent plants and columns represent animals. An entry of 0.8
+means an 80% modelled probability of interaction when both species are
+present. It is neither an observed interaction count nor a species
+occurrence probability.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(metaweave)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>probabilities <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.7</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">&quot;plant_a&quot;</span>, <span class="st">&quot;plant_b&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;animal_x&quot;</span>, <span class="st">&quot;animal_y&quot;</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">probability_matrix_model</span>(probabilities, <span class="st">&quot;plants&quot;</span>, <span class="st">&quot;animals&quot;</span>)</span></code></pre></div>
+</div>
+<div id="infer-one-local-network" class="section level2">
+<h2>Infer one local network</h2>
+<p>An assemblage lists species present at one location. Group names must
+match those supplied to the model. This model selects relevant rows and
+columns from the supplied matrix; it does not refit the probabilities
+locally.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>site <span class="ot">&lt;-</span> <span class="fu">new_assemblage</span>(<span class="fu">list</span>(<span class="at">plants =</span> <span class="fu">c</span>(<span class="st">&quot;plant_a&quot;</span>, <span class="st">&quot;plant_b&quot;</span>),</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                            <span class="at">animals =</span> <span class="st">&quot;animal_x&quot;</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>network <span class="ot">&lt;-</span> <span class="fu">infer_network</span>(site, model)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>network<span class="sc">$</span>matrix</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt;         animal_x</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; plant_a      0.8</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; plant_b      0.3</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">summarize_network</span>(network)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;   row_richness column_richness possible_links expected_links mean_probability</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; 1            2               1              2            1.1             0.55</span></span></code></pre></div>
+<p>There are two possible plant-animal pairs. Their probabilities sum to
+1.1, the expected number of links. An expectation can be fractional: it
+describes an average over possible outcomes, rather than a count of
+observed interactions.</p>
+</div>
+<div id="apply-the-model-across-a-small-landscape" class="section level2">
+<h2>Apply the model across a small landscape</h2>
+<p>Each raster layer represents one species and each cell represents one
+location. Nonzero values indicate presence; zero or missing values
+indicate absence. All groups must share the same grid and coordinate
+reference system. Species layer names must match the interaction
+matrix.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">create_standard_grid</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>), <span class="at">resolution =</span> <span class="dv">1</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>plants <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(<span class="fu">list</span>(grid, grid))</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>animals <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(<span class="fu">list</span>(grid, grid))</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">names</span>(plants) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(probabilities)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">names</span>(animals) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(probabilities)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>terra<span class="sc">::</span><span class="fu">values</span>(plants) <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>terra<span class="sc">::</span><span class="fu">values</span>(animals) <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">run_spatial_inference</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="at">distributions =</span> <span class="fu">list</span>(<span class="at">plants =</span> plants, <span class="at">animals =</span> animals),</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="at">model =</span> model, <span class="at">min_species =</span> <span class="dv">1</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>)</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>result<span class="sc">$</span>result<span class="sc">$</span>index</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;   cell_id   x   y row_richness column_richness possible_links expected_links</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; 1       1 0.5 1.5            2               1              2            1.1</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 2       2 1.5 1.5            1               2              2            1.0</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 3       3 0.5 0.5            1               2              2            1.0</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; 4       4 1.5 0.5            2               1              2            0.9</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;   mean_probability</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; 1             0.55</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; 2             0.50</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; 3             0.50</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; 4             0.45</span></span></code></pre></div>
+<p>The workflow identifies local species, infers their networks,
+summarizes each network and maps the summaries to the original grid.
+<code>min_species = 1</code> retains cells with at least one species in
+each group. The index contains cell IDs, coordinates and summaries.
+Individual networks are in <code>result$result$networks</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>terra<span class="sc">::</span><span class="fu">plot</span>(result<span class="sc">$</span>spatial<span class="sc">$</span>data[[<span class="st">&quot;expected_links&quot;</span>]], <span class="at">main =</span> <span class="st">&quot;Expected links per cell&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>This map shows expected link counts under the supplied probabilities
+and presence data. It does not show observed interactions or uncertainty
+intervals.</p>
+</div>
+<div id="other-models" class="section level2">
+<h2>Other models</h2>
+<ul>
+<li><code>block_model()</code> uses supplied probabilities between
+species blocks.</li>
+<li><code>maxent_model()</code> generates directed network ensembles
+subject to link-count or degree constraints. Its help page explains
+assumptions and sampling limits.</li>
+<li><code>new_inference_model()</code> connects a custom prediction
+function to the workflow.</li>
+<li><code>simulate_interaction_counts()</code> allocates a fixed total
+of counts in proportion to matrix entries. These counts are not
+independent binary links.</li>
+</ul>
+<p>See function help pages for inputs and returned objects. Use
+<code>citation(&quot;metaweave&quot;)</code> for the software citation.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

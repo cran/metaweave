@@ -1,0 +1,27 @@
+Package: metaweave
+Title: Spatial Ecological Network Inference
+Version: 0.4.1
+Authors@R: person("Gabriel", "Munoz", role = c("aut", "cre", "cph"),
+    email = "gmunozacevedo@proton.me",
+    comment = c(Affiliation = "Concordia University"))
+Description: A model-agnostic framework for reconstructing and analysing
+    spatially explicit ecological networks from species distributions and
+    ecological inference models. Supports arbitrary ecological groups and
+    includes stochastic block and maximum-entropy inference backends,
+    simulation helpers, network summaries, and spatial mapping utilities.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: methods, stats, terra
+Suggests: knitr, rmarkdown, sf, testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+URL: https://github.com/fgabriel1891/metaweave
+BugReports: https://github.com/fgabriel1891/metaweave/issues
+Config/roxygen2/version: 8.1.0
+NeedsCompilation: no
+Packaged: 2026-09-27 23:47:40 UTC; gabri
+Author: Gabriel Munoz [aut, cre, cph] (Affiliation: Concordia University)
+Maintainer: Gabriel Munoz <gmunozacevedo@proton.me>
+Repository: CRAN
+Date/Publication: 2026-10-07 09:50:10 UTC
