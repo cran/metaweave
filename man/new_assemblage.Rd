@@ -7,11 +7,13 @@
 new_assemblage(species, cell_id = NA_integer_, coordinates = NULL)
 }
 \arguments{
-\item{species}{Named list of character vectors, one per ecological group.}
+\item{species}{Nonempty named list of species vectors, one per ecological
+group. Group names and species names within a group must be unique and
+nonempty; species names are coerced to character.}
 
-\item{cell_id}{Optional raster cell identifier.}
+\item{cell_id}{Optional positive integer raster cell identifier or \code{NA}.}
 
-\item{coordinates}{Optional named numeric vector containing x and y.}
+\item{coordinates}{Optional two finite numeric values in x/y order.}
 }
 \value{
 An \code{assemblage} list with \code{species}, \code{cell_id}, and \code{coordinates}.

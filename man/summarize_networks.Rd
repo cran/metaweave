@@ -12,7 +12,9 @@ summarize_networks(x, threshold = NULL)
 \item{threshold}{Optional probability threshold.}
 }
 \value{
-The input \code{network_collection} with summary columns appended to its \code{index}; see \code{\link[=summarize_network]{summarize_network()}} for column definitions.
+The input \code{network_collection} with summary columns appended to its
+\code{index}; see \code{\link[=summarize_network]{summarize_network()}} for column definitions. A zero-network
+collection receives the same five columns with zero rows.
 }
 \description{
 Summarize a collection of networks

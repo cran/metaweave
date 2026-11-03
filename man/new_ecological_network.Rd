@@ -15,7 +15,9 @@ new_ecological_network(
 )
 }
 \arguments{
-\item{matrix}{Numeric interaction matrix.}
+\item{matrix}{Numeric interaction matrix. Probabilities must be finite in
+\verb{[0, 1]}; binary entries must be 0 or 1. Weighted and observed entries
+must be nonnegative and may be \code{NA}.}
 
 \item{type}{One of probability, binary, weighted, or observed.}
 

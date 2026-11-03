@@ -1,16 +1,31 @@
 #' Simulate an interaction-count matrix
-#' @param network Ecological network or probability matrix.
-#' @param size Total number of interactions.
-#' @param seed Optional random seed.
+#' @param network Ecological network or nonnegative numeric matrix.
+#' @param size Nonnegative integer total number of interactions.
+#' @param seed Optional nonnegative integer seed. A supplied seed produces a
+#'   repeatable draw without changing the caller's global random state.
 #' @return An integer matrix with the input dimensions and names. Counts sum to `size` when positive probability mass exists; otherwise all entries are zero.
 #' @export
 simulate_interaction_counts <- function(network, size = 100L, seed = NULL) {
   mat <- if (inherits(network, "ecological_network")) network$matrix else network
-  if (!is.null(seed)) set.seed(seed)
+  if (!is.matrix(mat) || !is.numeric(mat) ||
+      any(is.infinite(mat) | is.nan(mat)) || any(mat < 0, na.rm = TRUE)) {
+    stop("`network` must contain a nonnegative numeric matrix without infinite values.")
+  }
+  if (!is.numeric(size) || length(size) != 1L || !is.finite(size) ||
+      size < 0 || size != floor(size) || size > .Machine$integer.max) {
+    stop("`size` must be one nonnegative integer.")
+  }
+  if (!is.null(seed) && (!is.numeric(seed) || length(seed) != 1L ||
+      !is.finite(seed) || seed < 0 || seed != floor(seed) ||
+      seed > .Machine$integer.max)) {
+    stop("`seed` must be one nonnegative integer or NULL.")
+  }
   probs <- as.numeric(mat)
   if (!length(probs) || sum(probs, na.rm = TRUE) <= 0) return(matrix(0L, nrow(mat), ncol(mat), dimnames = dimnames(mat)))
   probs[is.na(probs)] <- 0
-  out <- matrix(as.integer(stats::rmultinom(1, size, probs / sum(probs))), nrow(mat), ncol(mat), dimnames = dimnames(mat))
+  counts <- .maxent_with_seed(if (is.null(seed)) NULL else as.integer(seed),
+                              function() stats::rmultinom(1, size, probs / sum(probs)))
+  out <- matrix(as.integer(counts), nrow(mat), ncol(mat), dimnames = dimnames(mat))
   out
 }
 
@@ -21,6 +36,9 @@ simulate_interaction_counts <- function(network, size = 100L, seed = NULL) {
 #' @return A weighted `ecological_network` containing simulated interaction counts and the source network in its metadata.
 #' @export
 simulate_network <- function(network, size = 100L, seed = NULL) {
+  if (!inherits(network, "ecological_network")) {
+    stop("`network` must be an ecological network.")
+  }
   new_ecological_network(simulate_interaction_counts(network, size, seed), "weighted", list(source = network),
                          network$row_group, network$column_group,
                          directed = isTRUE(network$directed),
@@ -29,7 +47,8 @@ simulate_network <- function(network, size = 100L, seed = NULL) {
 
 #' Summarize one ecological network
 #' @param network Ecological network or numeric matrix.
-#' @param threshold Optional threshold for realized links.
+#' @param threshold Optional finite threshold for realized links; for
+#'   probability networks it must lie in `[0, 1]`.
 #' @return A one-row data frame with `row_richness`, `column_richness`,
 #'   `possible_links` (number of eligible matrix entries), `expected_links`
 #'   (sum of eligible entries, or number at least `threshold`), and
@@ -48,7 +67,16 @@ simulate_network <- function(network, size = 100L, seed = NULL) {
 #' summarize_network(p, threshold = 0.5)
 #' @export
 summarize_network <- function(network, threshold = NULL) {
+  if (!is.null(threshold) && (!is.numeric(threshold) ||
+      length(threshold) != 1L || !is.finite(threshold))) {
+    stop("`threshold` must be one finite number.")
+  }
+  if (!is.null(threshold) && inherits(network, "probability_network") &&
+      (threshold < 0 || threshold > 1)) {
+    stop("Probability threshold must lie in [0, 1].")
+  }
   mat <- if (inherits(network, "ecological_network")) network$matrix else network
+  if (!is.matrix(mat) || !is.numeric(mat)) stop("`network` must contain a numeric matrix.")
   allowed <- matrix(TRUE, nrow(mat), ncol(mat))
   if (inherits(network, "ecological_network") && identical(network$self_links, FALSE)) {
     if (!is.null(rownames(mat)) && !is.null(colnames(mat))) {
@@ -70,16 +98,29 @@ summarize_network <- function(network, threshold = NULL) {
 #' Summarize a collection of networks
 #' @param x Network collection.
 #' @param threshold Optional probability threshold.
-#' @return The input `network_collection` with summary columns appended to its `index`; see [summarize_network()] for column definitions.
+#' @return The input `network_collection` with summary columns appended to its
+#'   `index`; see [summarize_network()] for column definitions. A zero-network
+#'   collection receives the same five columns with zero rows.
 #' @export
 summarize_networks <- function(x, threshold = NULL) {
+  if (!inherits(x, "network_collection")) stop("`x` must be a network collection.")
+  if (!length(x$networks)) {
+    x$index$row_richness <- integer()
+    x$index$column_richness <- integer()
+    x$index$possible_links <- integer()
+    x$index$expected_links <- numeric()
+    x$index$mean_probability <- numeric()
+    return(x)
+  }
   metrics <- do.call(rbind, lapply(x$networks, summarize_network, threshold = threshold))
   x$index <- cbind(x$index, metrics)
   x
 }
 
-#' Placeholder adapter for rarefaction packages
-#' @description Simulates a standardized count matrix and evaluates a user-supplied metric function.
+#' Experimental rarefied network metric
+#' @description Simulates standardized count matrices and evaluates a
+#'   user-supplied metric function. This helper is experimental in MetaWeave
+#'   1.0; its metric and random-number behavior are outside the stable 1.x API.
 #' @param prob_mat Probability matrix.
 #' @param target_size Standardized number of interactions.
 #' @param metric A function accepting a count matrix.

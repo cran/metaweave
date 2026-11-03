@@ -9,7 +9,8 @@ summarize_network(network, threshold = NULL)
 \arguments{
 \item{network}{Ecological network or numeric matrix.}
 
-\item{threshold}{Optional threshold for realized links.}
+\item{threshold}{Optional finite threshold for realized links; for
+probability networks it must lie in \verb{[0, 1]}.}
 }
 \value{
 A one-row data frame with \code{row_richness}, \code{column_richness},

@@ -22,7 +22,10 @@ Row and column names are required and must be unique.}
 \item{name}{Descriptive model name stored in outputs.}
 }
 \value{
-An \code{inference_model} with subclass \code{probability_matrix_model}. Prediction subsets the supplied matrix to locally present, matched species.
+An \code{inference_model} with subclass \code{probability_matrix_model}.
+Prediction subsets the supplied matrix to locally present, matched
+species. Unmatched local species are listed in the resulting network's
+\code{metadata$excluded_rows} and \code{metadata$excluded_columns}.
 }
 \description{
 Use this backend when an external model returns probabilities for named

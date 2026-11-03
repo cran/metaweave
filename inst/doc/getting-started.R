@@ -15,6 +15,7 @@ site <- new_assemblage(list(plants = c("plant_a", "plant_b"),
 network <- infer_network(site, model)
 network$matrix
 summarize_network(network)
+network$metadata$excluded_rows
 
 ## -----------------------------------------------------------------------------
 grid <- create_standard_grid(c(0, 2, 0, 2), resolution = 1)

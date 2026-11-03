@@ -62,6 +62,11 @@ An \code{inference_model} compatible with \code{\link[=infer_network]{infer_netw
 \code{\link[=infer_networks]{infer_networks()}}.
 }
 \description{
+\strong{Experimental:} this backend remains available in MetaWeave 1.0, but its
+degree-sequence sampler and scientific interpretation are not part of the
+stable 1.x API. Review the constraints and sampling limits below before
+using its output for inference.
+
 Constructs a directed network inference backend that generates binary
 adjacency matrices under hard structural constraints and returns their
 marginal species-pair probabilities. Rows are consumers, columns are
@@ -74,6 +79,10 @@ number of links. This is the maximum-entropy distribution under a hard link
 count. For \code{constraint = "degree_sequence"}, a feasible matrix is found by
 maximum flow and randomized with degree-preserving checkerboard swaps. This
 is an approximate uniform MCMC ensemble conditional on the supplied margins.
+The degree-preserving swap chain has no built-in convergence diagnostic;
+\code{burn_in} and \code{thin} count proposals, not accepted swaps. Marginal
+probabilities from this route should be checked for sensitivity to these
+settings and to the seed.
 
 The implementation follows the constrained, minimally biased ensemble
 rationale of Banville, Gravel & Poisot (2023), but does not yet implement

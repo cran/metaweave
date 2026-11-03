@@ -375,11 +375,17 @@ locally.</p>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; plant_b      0.3</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">summarize_network</span>(network)</span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;   row_richness column_richness possible_links expected_links mean_probability</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; 1            2               1              2            1.1             0.55</span></span></code></pre></div>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; 1            2               1              2            1.1             0.55</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>network<span class="sc">$</span>metadata<span class="sc">$</span>excluded_rows</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; character(0)</span></span></code></pre></div>
 <p>There are two possible plant-animal pairs. Their probabilities sum to
 1.1, the expected number of links. An expectation can be fractional: it
 describes an average over possible outcomes, rather than a count of
-observed interactions.</p>
+observed interactions. The <code>excluded_rows</code> and
+<code>excluded_columns</code> metadata fields list locally present
+species that were absent from the supplied interaction model. They are
+empty in this example; check them when combining data from different
+sources.</p>
 </div>
 <div id="apply-the-model-across-a-small-landscape" class="section level2">
 <h2>Apply the model across a small landscape</h2>
@@ -426,9 +432,11 @@ intervals.</p>
 <ul>
 <li><code>block_model()</code> uses supplied probabilities between
 species blocks.</li>
-<li><code>maxent_model()</code> generates directed network ensembles
-subject to link-count or degree constraints. Its help page explains
-assumptions and sampling limits.</li>
+<li><code>maxent_model()</code> is experimental. It generates directed
+network ensembles subject to link-count or degree constraints; the
+degree-sequence route uses approximate sampling without a built-in
+convergence diagnostic. Its help page explains assumptions and sampling
+limits.</li>
 <li><code>new_inference_model()</code> connects a custom prediction
 function to the workflow.</li>
 <li><code>simulate_interaction_counts()</code> allocates a fixed total

@@ -44,11 +44,15 @@ site <- new_assemblage(list(plants = c("plant_a", "plant_b"),
 network <- infer_network(site, model)
 network$matrix
 summarize_network(network)
+network$metadata$excluded_rows
 ```
 
 There are two possible plant-animal pairs. Their probabilities sum to 1.1,
 the expected number of links. An expectation can be fractional: it describes an
 average over possible outcomes, rather than a count of observed interactions.
+The `excluded_rows` and `excluded_columns` metadata fields list locally present
+species that were absent from the supplied interaction model. They are empty
+in this example; check them when combining data from different sources.
 
 ## Apply the model across a small landscape
 
@@ -87,8 +91,10 @@ data. It does not show observed interactions or uncertainty intervals.
 ## Other models
 
 - `block_model()` uses supplied probabilities between species blocks.
-- `maxent_model()` generates directed network ensembles subject to link-count or
-  degree constraints. Its help page explains assumptions and sampling limits.
+- `maxent_model()` is experimental. It generates directed network ensembles
+  subject to link-count or degree constraints; the degree-sequence route uses
+  approximate sampling without a built-in convergence diagnostic. Its help
+  page explains assumptions and sampling limits.
 - `new_inference_model()` connects a custom prediction function to the workflow.
 - `simulate_interaction_counts()` allocates a fixed total of counts in proportion
   to matrix entries. These counts are not independent binary links.

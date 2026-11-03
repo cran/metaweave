@@ -7,9 +7,11 @@
 assemble_communities(distributions, min_species = 1L)
 }
 \arguments{
-\item{distributions}{Named list of SpatRaster or distribution_collection objects.}
+\item{distributions}{Nonempty named list of \code{SpatRaster} or
+\code{distribution_collection} objects with unique group and species names,
+aligned geometry, and nonnegative values. Zero and \code{NA} indicate absence.}
 
-\item{min_species}{Minimum species per group.}
+\item{min_species}{Positive integer minimum species per group.}
 }
 \value{
 A list of \code{assemblage} objects, one per cell meeting \code{min_species} in every group. Nonzero, nonmissing raster values indicate presence; the list is empty if no cell qualifies.

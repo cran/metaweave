@@ -15,9 +15,18 @@ infer_network <- function(assemblage, model) {
 #' @param assemblages List of assemblages.
 #' @param model Inference model.
 #' @param template Optional spatial template.
-#' @return A `network_collection` containing one network per assemblage and an index with `cell_id`, `x`, and `y` columns.
+#' @return A `network_collection` containing one network per assemblage and an
+#'   index with `cell_id`, `x`, and `y` columns. An empty input returns a
+#'   zero-network collection with a zero-row index.
 #' @export
 infer_networks <- function(assemblages, model, template = NULL) {
+  if (!is.list(assemblages)) stop("`assemblages` must be a list.")
+  if (!inherits(model, "inference_model")) stop("`model` must be an inference model.")
+  if (!length(assemblages)) {
+    idx <- data.frame(cell_id = integer(), x = numeric(), y = numeric())
+    return(new_network_collection(list(), idx, template,
+                                  settings = list(model = model$name)))
+  }
   nets <- lapply(assemblages, infer_network, model = model)
   idx <- do.call(rbind, lapply(assemblages, function(a) {
     coordinates <- as.numeric(a$coordinates)
@@ -59,7 +68,10 @@ reconstruct_networks <- function(distributions, model, min_species = 1L) {
 #' @param row_group Assemblage group corresponding to matrix rows.
 #' @param column_group Assemblage group corresponding to matrix columns.
 #' @param name Descriptive model name stored in outputs.
-#' @return An `inference_model` with subclass `probability_matrix_model`. Prediction subsets the supplied matrix to locally present, matched species.
+#' @return An `inference_model` with subclass `probability_matrix_model`.
+#'   Prediction subsets the supplied matrix to locally present, matched
+#'   species. Unmatched local species are listed in the resulting network's
+#'   `metadata$excluded_rows` and `metadata$excluded_columns`.
 #' @examples
 #' p <- matrix(c(0.8, 0.3), 2, dimnames = list(c("a", "b"), "x"))
 #' model <- probability_matrix_model(p, "plants", "animals")
@@ -99,13 +111,17 @@ probability_matrix_model <- function(probability_matrix, row_group, column_group
     }
     rows <- assemblage$species[[par$row_group]]
     columns <- assemblage$species[[par$column_group]]
+    excluded_rows <- rows[!rows %in% rownames(par$probability_matrix)]
+    excluded_columns <- columns[!columns %in% colnames(par$probability_matrix)]
     rows <- rows[rows %in% rownames(par$probability_matrix)]
     columns <- columns[columns %in% colnames(par$probability_matrix)]
     mat <- par$probability_matrix[rows, columns, drop = FALSE]
     new_ecological_network(
       mat,
       type = "probability",
-      metadata = list(cell_id = assemblage$cell_id, model = model$name),
+      metadata = list(cell_id = assemblage$cell_id, model = model$name,
+                      excluded_rows = excluded_rows,
+                      excluded_columns = excluded_columns),
       row_group = par$row_group,
       column_group = par$column_group
     )
@@ -126,25 +142,46 @@ probability_matrix_model <- function(probability_matrix, row_group, column_group
 #' Construct a generic stochastic block model backend
 #' @param row_lookup Data frame mapping species in the matrix rows to blocks.
 #' @param column_lookup Data frame mapping species in the matrix columns to blocks.
-#' @param theta Guild-by-guild probability matrix.
+#' @param theta Finite guild-by-guild probability matrix with unique row and
+#'   column guild names covering the supplied lookup guilds.
 #' @param row_group Name of the assemblage group placed in matrix rows.
 #' @param column_group Name of the assemblage group placed in matrix columns.
 #' @param species_col Species column in lookup tables.
 #' @param guild_col Guild column in lookup tables.
-#' @return An `inference_model` with subclass `block_model`. Prediction returns a probability network using the supplied block assignments and probabilities; no model fitting is performed.
+#' @return An `inference_model` with subclass `block_model`. Prediction returns
+#'   a probability network using the supplied block assignments and
+#'   probabilities; no model fitting is performed. Unmatched local species are
+#'   listed in `metadata$excluded_rows` and `metadata$excluded_columns`.
 #' @export
 block_model <- function(row_lookup, column_lookup, theta, row_group, column_group,
                         species_col = "species", guild_col = "guild") {
   validate_lookup <- function(x, label) {
+    if (!is.data.frame(x)) stop(label, " lookup must be a data frame.")
     if (!all(c(species_col, guild_col) %in% names(x))) stop(label, " lookup lacks required columns.")
-    if (anyDuplicated(x[[species_col]])) stop(label, " species must be unique.")
+    species <- as.character(x[[species_col]])
+    guilds <- as.character(x[[guild_col]])
+    if (anyNA(species) || any(!nzchar(species)) || anyDuplicated(species))
+      stop(label, " species must be unique, non-missing, and non-empty.")
+    if (anyNA(guilds) || any(!nzchar(guilds)))
+      stop(label, " guilds must be non-missing and non-empty.")
   }
   validate_lookup(row_lookup, "Row-group")
   validate_lookup(column_lookup, "Column-group")
   if (!is.character(row_group) || length(row_group) != 1L || !nzchar(row_group)) stop("`row_group` must be one non-empty name.")
   if (!is.character(column_group) || length(column_group) != 1L || !nzchar(column_group)) stop("`column_group` must be one non-empty name.")
   if (identical(row_group, column_group)) stop("Bipartite row and column groups must have different names.")
-  if (!is.matrix(theta) || any(theta < 0 | theta > 1, na.rm = TRUE)) stop("`theta` must be a probability matrix.")
+  if (!is.matrix(theta) || !is.numeric(theta) ||
+      any(!is.finite(theta)) || any(theta < 0 | theta > 1) ||
+      is.null(rownames(theta)) || is.null(colnames(theta)) ||
+      anyNA(rownames(theta)) || anyNA(colnames(theta)) ||
+      any(!nzchar(rownames(theta))) || any(!nzchar(colnames(theta))) ||
+      anyDuplicated(rownames(theta)) || anyDuplicated(colnames(theta))) {
+    stop("`theta` must be a finite probability matrix with unique guild names.")
+  }
+  if (!all(as.character(row_lookup[[guild_col]]) %in% rownames(theta)) ||
+      !all(as.character(column_lookup[[guild_col]]) %in% colnames(theta))) {
+    stop("Lookup guilds are missing from `theta` dimnames.")
+  }
   pred <- function(model, assemblage) {
     par <- model$parameters
     if (!all(c(par$row_group, par$column_group) %in% names(assemblage$species))) {
@@ -155,6 +192,8 @@ block_model <- function(row_lookup, column_lookup, theta, row_group, column_grou
     ri <- match(rows, par$row_lookup[[par$species_col]])
     ci <- match(columns, par$column_lookup[[par$species_col]])
     keep_r <- !is.na(ri); keep_c <- !is.na(ci)
+    excluded_rows <- rows[!keep_r]
+    excluded_columns <- columns[!keep_c]
     rows <- rows[keep_r]; columns <- columns[keep_c]; ri <- ri[keep_r]; ci <- ci[keep_c]
     rg <- as.character(par$row_lookup[[par$guild_col]][ri])
     cg <- as.character(par$column_lookup[[par$guild_col]][ci])
@@ -169,7 +208,9 @@ block_model <- function(row_lookup, column_lookup, theta, row_group, column_grou
       dimnames(mat) <- list(rows, columns)
     }
     new_ecological_network(mat, "probability",
-      list(cell_id = assemblage$cell_id, model = "SBM"), par$row_group, par$column_group)
+      list(cell_id = assemblage$cell_id, model = "SBM",
+           excluded_rows = excluded_rows, excluded_columns = excluded_columns),
+      par$row_group, par$column_group)
   }
   new_inference_model(pred, "stochastic block model",
     list(row_lookup = row_lookup, column_lookup = column_lookup, theta = theta,

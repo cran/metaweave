@@ -7,7 +7,7 @@
 new_distribution_collection(data, guild = NULL, metadata = NULL)
 }
 \arguments{
-\item{data}{A named \code{terra::SpatRaster} whose layers represent species.}
+\item{data}{A nonempty \code{terra::SpatRaster} with unique, nonempty species layer names.}
 
 \item{guild}{Optional guild label for the collection.}
 

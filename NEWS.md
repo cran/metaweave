@@ -1,3 +1,19 @@
+# metaweave 1.0.0
+
+* Clarify that `maxent_model()` remains experimental. Its fixed-link route
+  samples uniformly under an exact link-count constraint, while the
+  degree-sequence route uses approximate swap-chain sampling without a built-in
+  convergence diagnostic. No algorithm behavior changes in this update.
+* Keep existing compatibility functions available in the 1.0 API.
+  `rarefied_network_metric()` remains experimental.
+* Tighten validation of assemblage names and coordinates, ecological-network
+  entries, block probabilities, and distribution rasters. Empty network
+  collections now retain typed index and metric columns, including when no
+  spatial cells qualify.
+* Record species excluded from pair-matrix and block-model predictions in
+  network metadata. Validate simulation counts and seeds, and restore the
+  caller's random state after seeded count simulation.
+
 # metaweave 0.4.1
 
 * Prepare the first CRAN submission with updated maintainer metadata.

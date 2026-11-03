@@ -1,6 +1,6 @@
 Package: metaweave
 Title: Spatial Ecological Network Inference
-Version: 0.4.1
+Version: 1.0.0
 Authors@R: person("Gabriel", "Munoz", role = c("aut", "cre", "cph"),
     email = "gmunozacevedo@proton.me",
     comment = c(Affiliation = "Concordia University"))
@@ -20,8 +20,8 @@ URL: https://github.com/fgabriel1891/metaweave
 BugReports: https://github.com/fgabriel1891/metaweave/issues
 Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2026-09-27 23:47:40 UTC; gabri
+Packaged: 2026-11-02 21:31:43 UTC; CodexSandboxOffline
 Author: Gabriel Munoz [aut, cre, cph] (Affiliation: Concordia University)
 Maintainer: Gabriel Munoz <gmunozacevedo@proton.me>
 Repository: CRAN
-Date/Publication: 2026-10-07 09:50:10 UTC
+Date/Publication: 2026-11-03 03:10:03 UTC

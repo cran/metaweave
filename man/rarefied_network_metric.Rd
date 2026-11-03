@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.R
 \name{rarefied_network_metric}
 \alias{rarefied_network_metric}
-\title{Placeholder adapter for rarefaction packages}
+\title{Experimental rarefied network metric}
 \usage{
 rarefied_network_metric(
   prob_mat,
@@ -27,5 +27,7 @@ rarefied_network_metric(
 A numeric mean of the supplied metric across simulated count matrices, with missing metric values omitted.
 }
 \description{
-Simulates a standardized count matrix and evaluates a user-supplied metric function.
+Simulates standardized count matrices and evaluates a user-supplied metric
+function. This helper is experimental in MetaWeave 1.0; its metric and
+random-number behavior are outside the stable 1.x API.
 }

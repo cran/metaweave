@@ -7,11 +7,12 @@
 simulate_interaction_counts(network, size = 100L, seed = NULL)
 }
 \arguments{
-\item{network}{Ecological network or probability matrix.}
+\item{network}{Ecological network or nonnegative numeric matrix.}
 
-\item{size}{Total number of interactions.}
+\item{size}{Nonnegative integer total number of interactions.}
 
-\item{seed}{Optional random seed.}
+\item{seed}{Optional nonnegative integer seed. A supplied seed produces a
+repeatable draw without changing the caller's global random state.}
 }
 \value{
 An integer matrix with the input dimensions and names. Counts sum to \code{size} when positive probability mass exists; otherwise all entries are zero.

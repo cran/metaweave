@@ -1,13 +1,16 @@
 #' Construct a distribution collection
 #'
-#' @param data A named `terra::SpatRaster` whose layers represent species.
+#' @param data A nonempty `terra::SpatRaster` with unique, nonempty species layer names.
 #' @param guild Optional guild label for the collection.
 #' @param metadata Optional species metadata data frame.
 #' @return A `distribution_collection` list with `data` (the raster), `guild`, and `metadata`.
 #' @export
 new_distribution_collection <- function(data, guild = NULL, metadata = NULL) {
   if (!inherits(data, "SpatRaster")) stop("`data` must be a SpatRaster.")
-  if (is.null(names(data)) || any(!nzchar(names(data)))) stop("Raster layers must be named.")
+  if (!length(data) || is.null(names(data)) || anyNA(names(data)) ||
+      any(!nzchar(names(data))) || anyDuplicated(names(data))) {
+    stop("Raster layers must have unique, non-empty species names.")
+  }
   structure(list(data = data, guild = guild, metadata = metadata), class = "distribution_collection")
 }
 
@@ -18,16 +21,36 @@ print.distribution_collection <- function(x, ...) {
 }
 
 #' Construct a local assemblage
-#' @param species Named list of character vectors, one per ecological group.
-#' @param cell_id Optional raster cell identifier.
-#' @param coordinates Optional named numeric vector containing x and y.
+#' @param species Nonempty named list of species vectors, one per ecological
+#'   group. Group names and species names within a group must be unique and
+#'   nonempty; species names are coerced to character.
+#' @param cell_id Optional positive integer raster cell identifier or `NA`.
+#' @param coordinates Optional two finite numeric values in x/y order.
 #' @return An `assemblage` list with `species`, `cell_id`, and `coordinates`.
 #' @examples
 #' new_assemblage(list(plants = c("a", "b"), animals = "x"), cell_id = 1)
 #' @export
 new_assemblage <- function(species, cell_id = NA_integer_, coordinates = NULL) {
-  if (!is.list(species) || is.null(names(species))) stop("`species` must be a named list.")
+  if (!is.list(species) || !length(species) || is.null(names(species)) ||
+      anyNA(names(species)) || any(!nzchar(names(species))) ||
+      anyDuplicated(names(species))) {
+    stop("`species` must be a non-empty list with unique, non-empty group names.")
+  }
   species <- lapply(species, as.character)
+  if (any(vapply(species, function(x) anyNA(x) || any(!nzchar(x)) ||
+                 anyDuplicated(x) > 0L, logical(1)))) {
+    stop("Species names within each group must be unique, non-missing, and non-empty.")
+  }
+  if (length(cell_id) != 1L || (!is.na(cell_id) &&
+      (!is.numeric(cell_id) || !is.finite(cell_id) || cell_id < 1 ||
+       cell_id != floor(cell_id)))) {
+    stop("`cell_id` must be one positive integer or NA.")
+  }
+  if (!is.null(coordinates) &&
+      (!is.numeric(coordinates) || length(coordinates) != 2L ||
+       any(!is.finite(coordinates)))) {
+    stop("`coordinates` must contain two finite numeric values (x, y).")
+  }
   structure(list(species = species, cell_id = cell_id, coordinates = coordinates), class = "assemblage")
 }
 
@@ -58,7 +81,9 @@ print.inference_model <- function(x, ...) {
 }
 
 #' Construct an ecological network
-#' @param matrix Numeric interaction matrix.
+#' @param matrix Numeric interaction matrix. Probabilities must be finite in
+#'   `[0, 1]`; binary entries must be 0 or 1. Weighted and observed entries
+#'   must be nonnegative and may be `NA`.
 #' @param type One of probability, binary, weighted, or observed.
 #' @param metadata Optional metadata.
 #' @param row_group,column_group Ecological groups represented by rows and columns.
@@ -71,7 +96,19 @@ new_ecological_network <- function(matrix, type = c("probability", "binary", "we
                                    directed = FALSE, self_links = NA) {
   type <- match.arg(type)
   if (!is.matrix(matrix) || !is.numeric(matrix)) stop("`matrix` must be a numeric matrix.")
-  if (type == "probability" && any(matrix < 0 | matrix > 1, na.rm = TRUE)) stop("Probabilities must lie in [0, 1].")
+  if (type == "probability" &&
+      (any(!is.finite(matrix)) || any(matrix < 0 | matrix > 1))) {
+    stop("Probabilities must be finite and lie in [0, 1].")
+  }
+  if (type == "binary" && (any(!is.finite(matrix)) ||
+      any(!(matrix %in% c(0, 1))))) {
+    stop("Binary network entries must be 0 or 1.")
+  }
+  if (type %in% c("weighted", "observed") &&
+      (any(is.infinite(matrix) | is.nan(matrix)) ||
+       any(matrix < 0, na.rm = TRUE))) {
+    stop("Network weights must be non-negative and not infinite.")
+  }
   if (!is.logical(directed) || length(directed) != 1L || is.na(directed)) stop("`directed` must be TRUE or FALSE.")
   if (!is.logical(self_links) || length(self_links) != 1L) stop("`self_links` must be TRUE, FALSE, or NA.")
   structure(list(matrix = matrix, type = type, metadata = metadata,

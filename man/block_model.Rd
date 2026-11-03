@@ -19,7 +19,8 @@ block_model(
 
 \item{column_lookup}{Data frame mapping species in the matrix columns to blocks.}
 
-\item{theta}{Guild-by-guild probability matrix.}
+\item{theta}{Finite guild-by-guild probability matrix with unique row and
+column guild names covering the supplied lookup guilds.}
 
 \item{row_group}{Name of the assemblage group placed in matrix rows.}
 
@@ -30,7 +31,10 @@ block_model(
 \item{guild_col}{Guild column in lookup tables.}
 }
 \value{
-An \code{inference_model} with subclass \code{block_model}. Prediction returns a probability network using the supplied block assignments and probabilities; no model fitting is performed.
+An \code{inference_model} with subclass \code{block_model}. Prediction returns
+a probability network using the supplied block assignments and
+probabilities; no model fitting is performed. Unmatched local species are
+listed in \code{metadata$excluded_rows} and \code{metadata$excluded_columns}.
 }
 \description{
 Construct a generic stochastic block model backend

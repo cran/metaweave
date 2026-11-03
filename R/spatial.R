@@ -122,17 +122,37 @@ prepare_range_stacks <- function(palm_source, mammal_source, mammal_species_col,
 }
 
 #' Assemble local communities from aligned distribution rasters
-#' @param distributions Named list of SpatRaster or distribution_collection objects.
-#' @param min_species Minimum species per group.
+#' @param distributions Nonempty named list of `SpatRaster` or
+#'   `distribution_collection` objects with unique group and species names,
+#'   aligned geometry, and nonnegative values. Zero and `NA` indicate absence.
+#' @param min_species Positive integer minimum species per group.
 #' @return A list of `assemblage` objects, one per cell meeting `min_species` in every group. Nonzero, nonmissing raster values indicate presence; the list is empty if no cell qualifies.
 #' @export
 assemble_communities <- function(distributions, min_species = 1L) {
-  if (!is.list(distributions) || is.null(names(distributions))) stop("`distributions` must be a named list.")
+  if (!is.list(distributions) || !length(distributions) ||
+      is.null(names(distributions)) || anyNA(names(distributions)) ||
+      any(!nzchar(names(distributions))) || anyDuplicated(names(distributions))) {
+    stop("`distributions` must be a non-empty list with unique group names.")
+  }
+  if (!is.numeric(min_species) || length(min_species) != 1L ||
+      !is.finite(min_species) || min_species < 1 || min_species != floor(min_species)) {
+    stop("`min_species` must be one positive integer.")
+  }
   rasters <- lapply(distributions, function(x) if (inherits(x, "distribution_collection")) x$data else x)
+  if (any(vapply(rasters, function(x) !inherits(x, "SpatRaster") ||
+                 !length(x) || is.null(names(x)) || anyNA(names(x)) ||
+                 any(!nzchar(names(x))) || anyDuplicated(names(x)) > 0L,
+                 logical(1)))) {
+    stop("Each group must have a non-empty raster with unique species layer names.")
+  }
   ref <- rasters[[1]]
   ok <- vapply(rasters[-1], function(x) terra::compareGeom(ref, x, stopOnError = FALSE), logical(1))
   if (length(ok) && !all(ok)) stop("All distribution rasters must share geometry.")
   values <- lapply(rasters, terra::values, mat = TRUE)
+  if (any(vapply(values, function(v) any(is.infinite(v)) ||
+                 any(v < 0, na.rm = TRUE), logical(1)))) {
+    stop("Distribution raster values must be non-negative and not infinite.")
+  }
   valid <- Reduce(`&`, lapply(values, function(v) rowSums(!is.na(v) & v != 0) >= min_species))
   cells <- which(valid)
   xy <- terra::xyFromCell(ref, cells)
